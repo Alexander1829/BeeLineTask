@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script>
+    //Общий веб-запрос
+    function makeRequest(method, url, body, onLoad) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        if (method == 'POST') {
+            xhr.setRequestHeader('Content-Type', 'application/json');
+        };
+        xhr.onload = async function () {
+            onLoad(null, xhr.response);
+        };
+        xhr.onerror = function () {
+            console.log(xhr.response);
+        };
+        xhr.timeout = 10000;
+        xhr.send(body);
+    }
+</script>
+
+<script>
+    let HOST = 'http://localhost:10004/'; //Хост WebApi
+
+    let NUM_DOT = 0; //число точек числа
+    let TOTAL = '';
+
+    //при загрузке страницы запрашиваем от сервера total, action, data
+    window.onload = function () {
+        getValue();
+    };    
+
+    //Запросить total, data, action от Апи
+    function getValue() {
+        let url = HOST + 'api/v1/general';
+        let method = 'GET';
+
+        makeRequest(method, url, null, async function (err, datums) {
+            let resp = JSON.parse(datums);
+            document.getElementById("total_id").innerText = (resp)["total"];
+            document.getElementById("data_id").innerText = (resp)["data"];
+            document.getElementById("action_id").innerText = (resp)["action"];
+        });
+    }
+
+    //Отправить новые (data, action)
+    function sendValue() {
+        let url = HOST + 'api/v1/general';
+        let method = 'POST';
+
+        //var data = document.getElementById("num_id").innerText;
+        var data = document.getElementById("input_num_id").value;
+        var action = document.getElementById("op_id").innerText;
+
+        if (data == "") {
+            alert("Укажите число");
+            return;
+        }
+        if (action == "") {
+            alert("Выберите операцию");
+            return;
+        }
+
+        if (action == "/" && Number(data) == 0) {
+            clr();
+            alert("Деление на ноль запрещено!");
+            return;
+        }
+
+        let body = JSON.stringify({
+            Action: action,
+            Data: Number(data)
+        });
+
+        makeRequest(method, url, body, async function (err, datums) {
+            wait(40);
+            clr();
+            getValue();
+        });
+    }
+
+    //-
+    function wait(ms) {
+        var d = new Date();
+        var d2 = null;
+        do { d2 = new Date(); }
+        while (d2 - d < ms);
+    }
+
+    //Добавить цифру
+    function dis(val) {
+        if (val == '.') {
+            NUM_DOT++;
+        }
+        if (val != '.' || (val == '.' && NUM_DOT < 2)) { //Добавляем любую цифру. И не более 1й точки.
+            document.getElementById("input_num_id").value += val;
+            //document.getElementById("num_id").innerText += val;
+        }
+        if ((val == '0' || val == '.') && document.getElementById("input_num_id").value.length == 1) {
+            document.getElementById("input_num_id").value = '0.';
+            //document.getElementById("num_id").innerText = '0.';
+            NUM_DOT = 1;
+        }
+    }
+
+    //Выбрать операцию
+    function disOp(val) {
+        document.getElementById("op_id").innerText = val;
+
+        for (i = 0; i < document.getElementsByClassName("op_ids").length; i++) {
+            document.getElementsByClassName("op_ids").item(i).setAttribute('background-color', 'green');
+        }
+    }
+
+    //Очистить поля
+    function clr() {
+        document.getElementById("op_id").innerText = "";
+        document.getElementById("input_num_id").value = "";
+        NUM_DOT = 0;
+    }
+
+    //Очистить label по id
+    function clrLabel(labelId) {
+        document.getElementById(labelId).value = "";
+    }
+
+</script>
+
+<style>
+    .parent {
+        //position: absolute;
+        //clear: none;
+    }
+
+    .child {
+        float: left;
+    }
+</style>
+
+
+<div class="parent">
+    <div class="child">
+        <table border="1">
+            <tr>
+                <td colspan="3"><input type="text" id="input_num_id" /></td>
+                <td><input type="button" value="Очистить" onclick="clr()" /> </td>
+            </tr>
+            <tr>
+                <td><input type="button" value="1" onclick="dis('1')" /> </td>
+                <td><input type="button" value="2" onclick="dis('2')" /> </td>
+                <td><input type="button" value="3" onclick="dis('3')" /> </td>
+                <td><input type="button" value="Вычислить на сервере" onclick="sendValue()" /> </td>
+            </tr>
+            <tr>
+                <td><input type="button" value="4" onclick="dis('4')" /> </td>
+                <td><input type="button" value="5" onclick="dis('5')" /> </td>
+                <td><input type="button" value="6" onclick="dis('6')" /> </td>
+                <td><input type="button" value=" " onclick="" /> </td>
+            </tr>
+            <tr>
+                <td><input type="button" value="7" onclick="dis('7')" /> </td>
+                <td><input type="button" value="8" onclick="dis('8')" /> </td>
+                <td><input type="button" value="9" onclick="dis('9')" /> </td>
+                <td><input type="button" value=" " onclick="" /> </td>
+            </tr>
+            <tr>
+                <td><input type="button" value="." onclick="dis('.')" /> </td>
+                <td><input type="button" value="0" onclick="dis('0')" /> </td>
+                <td><input type="button" value="+" onclick="disOp('+')" /> </td>
+                <td><input type="button" value=" " onclick="" /> </td>
+            </tr>
+            <tr>
+                <td><input type="button" value="-" onclick="disOp('-')" /> </td>
+                <td><input type="button" value="*" onclick="disOp('*')" /> </td>
+                <td><input type="button" value="/" onclick="disOp('/')" /> </td>
+                <td><input type="button" value=" " onclick="" /> </td>
+            </tr>
+        </table>
+    </div>
+</div>
+@*<br />
+<div class="parent" style="clear:left;">
+    <label class="child"> Введено число : </label>
+    <label class="child" id="num_id"></label>
+</div>*@
+<br />
+
+<div class="parent" style="clear:left;">
+    <label class="child op_ids"> Выбрана операция : </label>
+    <label class="child op_ids" id="op_id"></label>
+</div>
+
+<div class="parent" style="clear:left;">
+    <hr>
+</div>
+
+<div class="parent" style="clear:left;">
+    <label class="child"> Сумма(от сервера) : </label>
+    <label class="child" id="total_id"></label>
+</div>
+
+<div class="parent" style="clear:left;">
+    <label class="child"> Последнее число(от сервера) : </label>
+    <label class="child" id="data_id"></label>
+</div>
+
+<div class="parent" style="clear:left;">
+    <label class="child"> Последняя операция(от сервера) : </label>
+    <label class="child" id="action_id"></label>
+</div>
+
+
+

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Calculus.DTO\Calculus.DTO.csproj" />
+    <ProjectReference Include="..\Calculus.Serv\Calculus.Servs.csproj" />
+  </ItemGroup>
+
+</Project>

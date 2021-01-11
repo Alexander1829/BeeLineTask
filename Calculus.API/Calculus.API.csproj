@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>c63a7f6a-dbfa-4d71-adb8-cf5125724b79</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="1 12 1234" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Calculus.APIImpl\Calculus.APIImpl.csproj" />
+    <ProjectReference Include="..\Calculus.DTO\Calculus.DTO.csproj" />
+  </ItemGroup>
+
+
+</Project>
