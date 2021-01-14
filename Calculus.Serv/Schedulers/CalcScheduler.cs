@@ -20,7 +20,7 @@ namespace Calculus.Servs.Schedulers
     {
         private readonly ICalculationsSingl _calculations;
         private readonly IWriteQueueSingl _writeQueue;
-        
+
         public CalcScheduler(ICalculationsSingl calculations, IWriteQueueSingl writeQueue)
         {
             _calculations = calculations;
@@ -36,63 +36,58 @@ namespace Calculus.Servs.Schedulers
         {
             while (true)
             {
-                Thread.Sleep(1); //аналог реализации  await Task.Delay(1, stoppingToken);                            
-                var task1 = Task.Run(() =>
-                {
-                    SchedullerCalculator();
-                });
-                var task2 = Task.Run(() =>
-                {
-                    SchedullerWtiteInFiles();
-                });
-                await task1;
-                await task2;
+                Thread.Sleep(1);    //аналог реализации  await Task.Delay(1, stoppingToken);                            
+                await SchedullerCalculator();
+                await SchedullerWtiteInFiles();
             }
         }
 
         /// <summary>
         /// Расчитывает Total и отправляет данные на запись в файлы.
         /// </summary>
-        public void SchedullerCalculator()
+        public async Task SchedullerCalculator()
         {
-            lock (_calculations)
+            await Task.Run(() =>
             {
                 if (_calculations.ShouldCalculate)
                 {
-                    _calculations.ShouldCalculate = false;
-                    var calcResult = CalculateTotal();
-                    if (calcResult != null)
+                    lock (_calculations)
                     {
+                        _calculations.ShouldCalculate = false;
+                        var calcResult = CalculateTotal();
                         _writeQueue.WriteQueue.Add(calcResult);
                         _writeQueue.FilesShouldReload = true;
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
         /// Просматривает очередь на запись в файлы. И если в ней что-то есть, то обрабатывает её, обновляя файлы
         /// </summary>
-        public void SchedullerWtiteInFiles()
+        public async Task SchedullerWtiteInFiles()
         {
-            lock (_writeQueue)
+            await Task.Run(() =>
             {
                 if (_writeQueue.FilesShouldReload)
                 {
-                    _writeQueue.FilesShouldReload = false;
-                    if (_writeQueue.WriteQueue.Count > 0)
-                    {                        
-                        XmlCalcCurrent vC = new XmlCalcCurrent();
-                        vC.Current = _writeQueue.WriteQueue[_writeQueue.WriteQueue.Count - 1].Current;//просто берём последний, из добавленных в очередь на запись, Current
-                        string textCurrent = vC.SerializeXmlToStr();
-                        File.WriteAllTextAsync(AppConfig.FilePath_Current, textCurrent); //Current - полностью перезапишем файл
+                    lock (_writeQueue)
+                    {
+                        _writeQueue.FilesShouldReload = false;
+                        if (_writeQueue.WriteQueue.Count > 0)
+                        {
+                            XmlCalcCurrent xmlCalcCurrent = new XmlCalcCurrent();
+                            xmlCalcCurrent.Current = _writeQueue.WriteQueue[_writeQueue.WriteQueue.Count - 1].Current;//просто берём последний, из добавленных в очередь на запись, Current
+                            string textCurrent = xmlCalcCurrent.SerializeXmlToStr();
+                            File.WriteAllTextAsync(AppConfig.FilePath_Current, textCurrent); //Current - полностью перезапишем файл
 
-                        var fs = new FileServ();
-                        fs.AppendAtBeginFile(AppConfig.FilePath_Items, _writeQueue.QueueToFileText()); //Items - дописываем в начало файла, в обратном порядке
+                            var fs = new FileServ();
+                            fs.AppendAtBeginFile(AppConfig.FilePath_Items, _writeQueue.QueueToFileText()); //Items - дописываем в начало файла, в обратном порядке
+                        }
+                        _writeQueue.WriteQueue.Clear();
                     }
-                    _writeQueue.WriteQueue.Clear();
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -117,11 +112,10 @@ namespace Calculus.Servs.Schedulers
                         if (_calculations.Items[i].Data != 0)
                             _calculations.Current.Total /= _calculations.Items[i].Data;
                         else //На ноль не делим :)
-                            i++;
+                            throw new DivideByZeroException();
                 }
-                //в Items, для файла, сразу добавим операцию из текущего Current 
-                // (только если это не пустая, самая первая, псевдооперация)
-                if (!string.IsNullOrEmpty(_calculations.Current.Action))
+                //в Items, для файла, сразу добавим операцию из текущего Current                 
+                if (!string.IsNullOrEmpty(_calculations.Current.Action))//(если это не пустая, самая первая операция)
                 {
                     calcResult.Items.Add(new Action_Data()
                     {

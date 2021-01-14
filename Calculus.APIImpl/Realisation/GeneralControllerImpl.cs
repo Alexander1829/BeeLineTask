@@ -3,6 +3,7 @@ using Calculus.DTO;
 using Calculus.DTO.Config;
 using Calculus.DTO.Singltones;
 using Calculus.Servs;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -34,14 +35,12 @@ namespace Calculus.APIImpl.Realisation
         /// <param name="body"></param>
         public void PostCalc(Action_Data body)
         {
-            Task.Run(() =>
+            lock (_calculations)
             {
-                lock (_calculations)
-                {
-                    _calculations.Items.Add(new Action_Data() { Action = body.Action, Data = body.Data });
-                    _calculations.ShouldCalculate = true;
-                }
-            });
+                //_calculations.Items.Insert(i, body);
+                _calculations.Items.Add(new Action_Data() { Action = body.Action, Data = body.Data });
+                _calculations.ShouldCalculate = true;
+            }
         }
     }
 }

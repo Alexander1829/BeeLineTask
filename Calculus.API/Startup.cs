@@ -48,8 +48,7 @@ namespace Calculus.API
             services.AddSingleton(typeof(ICalculationsSingl), typeof(CalculationsSingl));// синглтон для рассчетов, в общей памяти для приложения.
             services.AddSingleton(typeof(IWriteQueueSingl), typeof(WriteQueueSingl));// синглтон очереди на запись в файл
 
-            services.AddHostedService<CalcScheduler>();//Служба высчитывает Current из синглтона. И перекачивает данные на жесткий диск                        
-            //services.AddHostedService<WriteInFileScheduler>();
+            services.AddHostedService<CalcScheduler>();//Служба высчитывает Current из синглтона. И перекачивает данные на жесткий диск                                    
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

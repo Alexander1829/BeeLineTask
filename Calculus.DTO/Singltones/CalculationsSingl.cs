@@ -13,24 +13,29 @@ using System.Threading;
 namespace Calculus.DTO.Singltones
 {
     /// <summary>
-    /// Синглтон. Набор поступивших данных для расчёта Total.
+    /// Синглтон. Набор поступивших данных для расчётов.
     /// </summary>    
     public class CalculationsSingl : ICalculationsSingl
     {
         /// <summary>
-        /// Действия которые предстоит выполнить.
+        /// Очередь на выполнение. (Действия которые предстоит выполнить)
         /// </summary>
         public List<Action_Data> Items { get; set; }
 
         /// <summary>
-        /// Последнее выполненное действие. И Total
+        /// Последнее выполненное действие и Total
         /// </summary>
         public Action_Data_Total Current { get; set; }
 
         /// <summary>
-        /// Необходимо ли пересчитать Current
+        /// Необходимо ли пересчитать Current (завёл отдельный флажок, чтобы тестировать на больших очередях Items)
         /// </summary>
         public bool ShouldCalculate { get; set; }
+
+        /// <summary>
+        /// Завершена ли загрузка Current из файла (загрузка при старте приложения: в синглтон из файла)
+        /// </summary>
+        public bool IsCurrentUploaded { get; set; }
 
 
         public CalculationsSingl()
@@ -38,11 +43,11 @@ namespace Calculus.DTO.Singltones
             Current = new Action_Data_Total();
             Items = new List<Action_Data>();
             ShouldCalculate = false;
+            IsCurrentUploaded = false;
 
             Task.Run(() =>
             {
-                bool success = false;
-                while (success == false)
+                while (true)
                 {
                     Thread.Sleep(1);
                     try 
@@ -51,7 +56,8 @@ namespace Calculus.DTO.Singltones
                         var result2 = text.DeserializeStrxml<XmlCalcCurrent>();
                         if (result2.Current != null)
                             Current = result2.Current;
-                        success = true;
+                        IsCurrentUploaded = true;
+                        break;
                     }
                     catch 
                     {

@@ -5,6 +5,9 @@ using System.Xml.Serialization;
 
 namespace Calculus.DTO.Xml
 {
+    /// <summary>
+    /// DTO для сериализации Action_Data_Total в xml-текст
+    /// </summary>
     [Serializable]
     [XmlRoot("Root", IsNullable = false)]
     public class XmlCalcCurrent

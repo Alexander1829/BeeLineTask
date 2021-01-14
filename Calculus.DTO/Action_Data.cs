@@ -18,6 +18,6 @@ namespace Calculus.DTO
         /// Слагаемое
         /// </summary>
         [XmlElement(Order = 1)]
-        public double Data { get; set; }        
+        public double Data { get; set; }       
     }
 }

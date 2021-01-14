@@ -11,9 +11,9 @@ namespace Calculus.DTO.Singltones
     public class WriteQueueSingl : IWriteQueueSingl
     {
         public List<CalcResult> WriteQueue { get; set; }
-        public bool FilesShouldReload{get;set;}
+        public bool FilesShouldReload { get; set; }
 
-        public WriteQueueSingl() 
+        public WriteQueueSingl()
         {
             WriteQueue = new List<CalcResult>();
         }
@@ -22,7 +22,7 @@ namespace Calculus.DTO.Singltones
         /// Преобразует Items из WriteQueue в строку для записи в файл
         /// </summary>
         /// <returns></returns>
-        public string QueueToFileText() 
+        public string QueueToFileText()
         {
             StringBuilder s = new StringBuilder();
             for (int i = WriteQueue.Count - 1; i >= 0; i--) //в обратном порядке, сначала последние запросы
@@ -33,7 +33,7 @@ namespace Calculus.DTO.Singltones
                         .Append("<Action>").Append(WriteQueue[i].Items[ii].Action).Append("</Action>")
                         .Append("<Data>").Append(WriteQueue[i].Items[ii].Data).Append("</Data>")
                     .Append("</Item>");
-                }                
+                }
             }
             return s.ToString();
         }
