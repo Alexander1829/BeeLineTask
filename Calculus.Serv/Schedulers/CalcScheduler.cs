@@ -77,12 +77,12 @@ namespace Calculus.Servs.Schedulers
                         if (_writeQueue.WriteQueue.Count > 0)
                         {
                             XmlCalcCurrent xmlCalcCurrent = new XmlCalcCurrent();
-                            xmlCalcCurrent.Current = _writeQueue.WriteQueue[_writeQueue.WriteQueue.Count - 1].Current;//просто берём последний, из добавленных в очередь на запись, Current
+                            xmlCalcCurrent.Current = _writeQueue.WriteQueue[_writeQueue.WriteQueue.Count - 1].Current;//Current берём последний, из добавленных в очередь на запись
                             string textCurrent = xmlCalcCurrent.SerializeXmlToStr();
                             File.WriteAllTextAsync(AppConfig.FilePath_Current, textCurrent); //Current - полностью перезапишем файл
 
                             var fs = new FileServ();
-                            fs.AppendAtBeginFile(AppConfig.FilePath_Items, _writeQueue.QueueToFileText()); //Items - дописываем в начало файла, в обратном порядке
+                            fs.AppendAtBeginFile(AppConfig.FilePath_Items, _writeQueue.QueueToFileText()); //Items - ДОписываем в начало файла, в обратном порядке
                         }
                         _writeQueue.WriteQueue.Clear();
                     }

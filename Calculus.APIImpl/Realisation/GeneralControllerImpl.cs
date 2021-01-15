@@ -37,8 +37,7 @@ namespace Calculus.APIImpl.Realisation
         {
             lock (_calculations)
             {
-                //_calculations.Items.Insert(i, body);
-                _calculations.Items.Add(new Action_Data() { Action = body.Action, Data = body.Data });
+                _calculations.Items.Add(body);
                 _calculations.ShouldCalculate = true;
             }
         }
